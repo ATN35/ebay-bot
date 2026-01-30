@@ -1,4 +1,0 @@
-[MASTER]
-disable=
-    import-error,
-    unused-import
