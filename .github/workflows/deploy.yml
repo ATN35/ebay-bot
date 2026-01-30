@@ -8,9 +8,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -18,44 +15,23 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
-          timeout: 30s
+          script_stop: true
+          timeout: 60s
           command_timeout: 15m
           script: |
             set -e
             APP_DIR="/home/ubuntu/apps/ebay-bot"
-            mkdir -p $APP_DIR
-            cd $APP_DIR
 
-            # Clone ou mise à jour du repo
+            mkdir -p "$APP_DIR"
+            cd "$APP_DIR"
+
             if [ ! -d ".git" ]; then
-              git clone https://github.com/${{ github.repository }} .
+              git clone "https://github.com/${{ github.repository }}.git" .
             else
               git fetch --all
               git reset --hard origin/main
             fi
 
-            # Arrêter les anciens containers
-            docker compose down --remove-orphans || true
-
-            # Déployer la nouvelle version
-            docker compose up -d --build || {
-              echo "❌ Déploiement échoué"
-              exit 1
-            }
-
-            # Attendre le démarrage des containers
-            sleep 5
-
-            # Vérifier la santé des containers
-            docker compose ps || exit 1
-
-            # Afficher les logs pour déboguer
-            echo "📋 Logs des containers:"
-            docker compose logs || true
-
-            # Nettoyage des images orphelines uniquement
-            docker image prune -f --filter "dangling=true"
-
-      - name: Notify on failure
-        if: failure()
-        run: echo "⚠️  Déploiement échoué - vérifier les logs de GitHub Actions"
+            docker compose up -d --build
+            docker ps --filter "name=ebay-bot"
+            docker logs --tail 50 ebay-bot || true
