@@ -2,7 +2,7 @@ name: Deploy ebay-bot to OVH VPS
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   deploy:
@@ -24,16 +24,26 @@ jobs:
 
             APP_DIR="/home/ubuntu/apps/ebay-bot"
 
+            echo "📁 Using $APP_DIR"
             mkdir -p "$APP_DIR"
             cd "$APP_DIR"
 
             if [ ! -d ".git" ]; then
-              git clone "https://github.com/${{ github.repository }}.git" .
-            else
-              git fetch --all
-              git reset --hard origin/main
+              echo "🆕 Initialisation du repo"
+              git init
+              git remote add origin https://github.com/${{ github.repository }}.git
             fi
 
+            echo "⬇️ Récupération du code"
+            git fetch origin
+            git checkout -B main origin/main
+            git reset --hard origin/main
+
+            echo "🐳 Docker build & run"
             docker compose up -d --build
-            docker ps --filter "name=ebay-bot"
+
+            echo "📦 Containers:"
+            docker ps
+
+            echo "📜 Logs ebay-bot:"
             docker logs --tail 30 ebay-bot || true
