@@ -7,6 +7,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -14,7 +15,6 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          port: 22
           script_stop: true
           timeout: 60s
           command_timeout: 15m
@@ -34,4 +34,4 @@ jobs:
 
             docker compose up -d --build
             docker ps --filter "name=ebay-bot"
-            docker logs --tail 50 ebay-bot || true
+            docker logs --tail 30 ebay-bot || true
