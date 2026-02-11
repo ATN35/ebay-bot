@@ -3,7 +3,8 @@ import os
 from datetime import datetime
 from typing import Any, Dict, List, Set
 
-DATA_DIR = os.path.join(os.getcwd(), "data")
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+DATA_DIR = os.getenv("DATA_DIR", os.path.join(BASE_DIR, "data"))
 SEEN_PATH = os.path.join(DATA_DIR, "seen.json")
 LOG_PATH = os.path.join(DATA_DIR, "bot.log")
 SNAPSHOT_DIR = os.path.join(DATA_DIR, "snapshots")
