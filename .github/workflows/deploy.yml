@@ -36,6 +36,8 @@ jobs:
 
             echo "⬇️ Récupération du code"
             git fetch origin
+            git reset --hard HEAD
+            git clean -fd
             git checkout -B main origin/main
             git reset --hard origin/main
 
